@@ -1,0 +1,596 @@
+import React, { Component} from 'react';
+import { ContextAuthWso2 } from '../../../ContexApi/contextAuthWso2';
+import axios from 'axios';
+import DatePickerRecepcion, { registerLocale } from "react-datepicker";
+import Swal from 'sweetalert2';
+import Select from 'react-select';
+import './css/index.css';
+import "react-datepicker/dist/react-datepicker.css";
+import InputPreradicados from './searchPreradicos';
+import es from 'date-fns/locale/es';
+import moment from 'moment';
+import * as RUTAS from '../../../utils/variables';
+import { KEY_ACCES_BACK_END } from '../../../utils/utils';
+
+class FormRecepcionFisica extends Component {
+  count = 0;
+  constructor(props) {
+    super(props);
+    this.state = {
+      inputDatePickerFocus: false,
+      btnSubmitText: 'ENVIAR',
+      btnSubmitDisable: false,
+      tipologias: [],
+      tiposTramite: [],
+      documentoSinSoporte: [],
+      centrosRecepcion: [],
+      centrosRecepcionGeneral: [],
+      sucursalesOrigen: [],
+      totalFacturaPreradicadas: 0,
+      inputs: {
+        fechaRecepcion: new Date(),
+        cliente: '',
+        tipologia: {
+          id: '',
+          nombre: 'Seleccionar',
+        },
+        tipoTramite: {
+          id: '',
+          nombre: 'Seleccionar'
+        },
+        documentoSinSoporte: {
+          id: '',
+          nombre: 'Seleccionar'
+        },
+        centroRecepcion: {
+          id: '',
+          nombre: 'Seleccionar'
+        },
+        sucursalOrigen: {
+          id: '',
+          nombre: 'Seleccionar'
+        },
+        codigoPreradicado: 'sin definir',
+        codigoInicial: '',
+        codigoFinal: '',
+        cantidad: '',
+        diferenciaPreRadicado: '',
+        npbs: false
+      }
+    }
+  }
+
+  componentWillMount = () => {
+    registerLocale('es', es);
+    axios({
+      method: 'get',
+      url: RUTAS.API_TIPOLOGIAS,
+      responseType: 'json',
+      headers: {
+        key: KEY_ACCES_BACK_END
+      }
+    }).then((response) => {
+      this.setState({ tipologias: response.data });
+    }).catch(error => console.log('error peticion::: ', error));
+
+    axios({
+      method: 'get',
+      url: RUTAS.API_CENTRORECEPCION,
+      responseType: 'json',
+      headers: {
+        key: KEY_ACCES_BACK_END
+      }
+    }).then((response) => {
+      this.setState({ centrosRecepcion: response.data, centrosRecepcionGeneral: response.data });
+    }).catch(error => console.log('error peticion::: ', error));
+  };
+
+  componentDidMount = () => { };
+
+  onChangeFechaRecepcion = date => {
+    this.setState({
+      ...this.state,
+      inputs: { ...this.state.inputs, fechaRecepcion: date }
+    });
+  }
+
+  inputDatePickerFocus = (e, state) => this.setState({ ...this.state, inputDatePickerFocus: state });
+
+  handleChangeTipologia = async ({ value, label, tiposTramite, idCliente, documentoSinSoporte }) => {
+
+    const sanitas = [
+      this.state.centrosRecepcion[0],
+      this.state.centrosRecepcion[1],
+      this.state.centrosRecepcion[2],
+      this.state.centrosRecepcion[3],
+      this.state.centrosRecepcion[5]
+    ];
+
+    if (Number(value) === 1) {
+      await this.setState({
+        centrosRecepcion: sanitas
+      })
+    } else {
+      await this.setState({
+        centrosRecepcion: this.state.centrosRecepcionGeneral
+      })
+    }
+
+    this.setState({
+      ...this.state,
+      tiposTramite,
+      documentoSinSoporte,
+      inputs: {
+        ...this.state.inputs,
+        cliente: idCliente,
+        tipologia: {
+          id: value,
+          nombre: label
+        },
+        tipoTramite: {
+          id: tiposTramite[0].tipoTramiteId,
+          nombre: tiposTramite[0].tipoTramite
+        },
+        documentoSinSoporte: {
+          id: '',
+          nombre: 'Seleccionar'
+        },
+      }
+    });
+  }
+
+  handleChangeTipoTramite = ({ value, label }) => {
+    this.setState({
+      ...this.state,
+      inputs: {
+        ...this.state.inputs,
+        tipoTramite: {
+          id: value,
+          nombre: label
+        }
+      }
+    })
+  };
+
+  handleChangeDocumentoSinSoporte = ({ value, label }) => {
+    this.setState({
+      ...this.state,
+      inputs: {
+        ...this.state.inputs,
+        documentoSinSoporte: {
+          id: value,
+          nombre: label
+        },
+      }
+    })
+  }
+
+  handleChangeCentrosRcp = async ({ value, label, sucursalesOrigen, tipologia }) => {
+
+    await this.tiposSucursalesOrigen(String(tipologia.id), String(value), sucursalesOrigen);
+
+    this.setState({
+      ...this.state,
+      inputs: {
+        ...this.state.inputs,
+        centroRecepcion: {
+          id: value,
+          nombre: label
+        },
+        sucursalOrigen: {
+          id: '',
+          nombre: 'Seleccionar'
+        },
+      }
+    })
+  }
+
+  tiposSucursalesOrigen = (tipologia, centro, sucursalesOrigen) => {
+    if (tipologia === '1' && centro === '2') {
+      this.setState({ ...this.state, sucursalesOrigen: [sucursalesOrigen[0], sucursalesOrigen[1]] });
+      return
+    }
+    if (tipologia === '2' && centro === '6') {
+      this.setState({ ...this.state, sucursalesOrigen: [sucursalesOrigen[1]] });
+      return
+    }
+    if (tipologia === '1' && centro === '6') {
+      this.setState({ ...this.state, sucursalesOrigen: [sucursalesOrigen[0]] });
+      return
+    }
+    if (tipologia === '2' && centro === '1') {
+      this.setState({ ...this.state, sucursalesOrigen: [sucursalesOrigen[0]] });
+      return
+    }
+    if (tipologia === '2' && centro === '2') {
+      this.setState({ ...this.state, sucursalesOrigen: [sucursalesOrigen[2]] });
+      return
+    }
+
+    this.setState({ ...this.state, sucursalesOrigen });
+  }
+
+  handleChangesucursalesOrigen = ({ value, label }) => {
+    this.setState({
+      ...this.state,
+      inputs: {
+        ...this.state.inputs,
+        sucursalOrigen: {
+          id: value,
+          nombre: label
+        },
+      }
+    })
+  };
+
+  handleChangePreradicado = async (listPreradicado) => {
+    if (listPreradicado.length > 0) {
+      let totalFacturaPreradicadas = 0;
+      await listPreradicado.forEach(prd => {
+        totalFacturaPreradicadas = totalFacturaPreradicadas + prd.totalFacturas
+      });
+      // console.log('TOTAL FACTURAS:::',totalFacturaPreradicadas);
+      this.setState({
+        ...this.state,
+        totalFacturaPreradicadas,
+        inputs: {
+          ...this.state.inputs,
+          codigoPreradicado: listPreradicado[0].value
+        }
+      })
+    } else {
+      this.setState({
+        ...this.state,
+        totalFacturaPreradicadas: 0,
+        inputs: {
+          ...this.state.inputs,
+          codigoPreradicado: ''
+        }
+      })
+    }
+
+  }
+
+  handleChange = async e => {
+    this.setState({
+      ...this.state,
+      inputs: {
+        ...this.state.inputs,
+        [e.target.name]: e.target.value
+      }
+    })
+  };
+
+  handleChangeChecked = e => {
+    this.setState({
+      ...this.state,
+      inputs: {
+        ...this.state.inputs,
+        [e.target.name]: e.target.checked
+      }
+    })
+  };
+
+  onSubmit = async (e, user) => {
+    e.preventDefault();
+    await this.setState({
+      ...this.state,
+      btnSubmitText: 'ENVIANDO...',
+      btnSubmitDisable: true,
+      inputs: {
+        ...this.state.inputs,
+        cantidad: this.cantidadView(),
+        diferenciaPreRadicado: this.diferenciaView()
+      }
+    });
+
+    const {
+      fechaRecepcion,
+      tipologia,
+      tipoTramite,
+      centroRecepcion,
+      sucursalOrigen,
+      codigoInicial,
+      codigoFinal,
+      cantidad } = this.state.inputs;
+
+    if (fechaRecepcion === '' || tipologia.id === '' || tipoTramite.id === '' || centroRecepcion.id === '' || sucursalOrigen.id === '' ||
+      codigoInicial === '' || codigoFinal === '' || cantidad === '' || cantidad < 0) {
+      Swal.fire({
+        type: 'error',
+        title: 'Error',
+        text: 'Campos vacíos!',
+      })
+      this.setState({ ...this.state, btnSubmitText: 'ENVIAR', btnSubmitDisable: false })
+    } else {
+      if (cantidad < 0) {
+        Swal.fire({
+          type: 'error',
+          title: 'Error',
+          text: 'el codigo inicial no puede ser mayor al codigo final',
+        })
+        this.setState({ ...this.state, btnSubmitText: 'ENVIAR', btnSubmitDisable: false })
+      } else {
+        axios.post(RUTAS.API_RECEPCION, {
+          fechaRecepcion: moment(this.state.inputs.fechaRecepcion).format(),
+          // fechaRecepcion: moment(this.state.inputs.fechaRecepcion).format('L'),
+          cliente: this.state.inputs.cliente,
+          tipologia: this.state.inputs.tipologia.id,
+          tipoTramite: this.state.inputs.tipoTramite.id,
+          centroRecepcion: this.state.inputs.centroRecepcion.id,
+          sucurcalRecepcion: this.state.inputs.sucursalOrigen.id,
+          preradicado: this.state.inputs.codigoPreradicado,
+          codigobarrasIni: this.state.inputs.codigoInicial,
+          codigobarrasFin: this.state.inputs.codigoFinal,
+          cantidad: this.state.inputs.cantidad,
+          diferencia: this.state.inputs.diferenciaPreRadicado,
+          npbs: this.state.inputs.npbs,
+          usuario: user.id,
+          docSinSoporte: this.state.inputs.documentoSinSoporte.id || 1 //documento no existente en la bd id 1
+        },
+          {
+            headers: {
+              key: KEY_ACCES_BACK_END
+            }
+          }).then(async data => {
+            // console.log('data recepcion result:: ', data);
+            await this.setState({
+              ...this.state,
+              btnSubmitText: 'ENVIAR',
+              btnSubmitDisable: false
+            })
+            await Swal.fire({
+              type: 'success',
+              title: 'Se guardo correctamente',
+              showConfirmButton: true,
+              timer: 1500
+            })
+            window.location.reload();
+          }).catch(error => {
+            console.log('error recepcion :: ', error.response.data.errors);
+            this.setState({
+              ...this.state,
+              btnSubmitText: 'ENVIAR',
+              btnSubmitDisable: false
+            })
+            Swal.fire({
+              type: 'error',
+              title: 'Error',
+              text: `
+              ${error.response.data.errors[0].params}: 
+              ${error.response.data.errors[0].msg}`,
+            })
+          });
+      }
+    }
+  }
+
+  cantidadView = () => {
+    const { codigoFinal, codigoInicial } = this.state.inputs;
+    if ((codigoFinal - codigoInicial) > 0) {
+      return (codigoFinal - codigoInicial) + 1
+    } else if (codigoFinal > 0 && codigoInicial > 0 && codigoFinal === codigoInicial) {
+      return 1;
+    }
+    return 0;
+  }
+
+  diferenciaView = () => {
+    const { codigoFinal, codigoInicial } = this.state.inputs;
+    if ((codigoFinal - codigoInicial) > 0) {
+      return (((codigoFinal - codigoInicial) + 1) - this.state.totalFacturaPreradicadas)
+    } else if (codigoFinal > 0 && codigoInicial > 0 && codigoFinal === codigoInicial) {
+      return 1 - this.state.totalFacturaPreradicadas;
+    }
+    return 0;
+  }
+
+  render() {
+
+    return (
+      <ContextAuthWso2.Consumer>
+        {({ usuario }) => {
+          return (
+            <div className="container center-align">
+              <form id="form_recepcion" className="row card" onSubmit={e => this.onSubmit(e, usuario)}>
+                <div className="row">
+
+                  <div className="input-field col s12 l3">
+                    Fecha de recepción
+                  <div className={`divpk ${this.state.inputDatePickerFocus ? 'input_focus' : ''} center-align`}>
+                      <DatePickerRecepcion
+                        onKeyDown={e => e.preventDefault()}
+                        id="fechaRecepcion"
+                        name="fechaRecepcion"
+                        placeholder="Fecha Recepción"
+                        className="fecha_recepcion browser-default"
+                        selected={this.state.inputs.fechaRecepcion}
+                        onChange={this.onChangeFechaRecepcion}
+                        // minDate={new Date('01/01/2018')}
+                        maxDate={new Date()}
+                        dateFormat="dd/MM/yyyy HH:mm"
+                        onFocus={(e) => this.inputDatePickerFocus(e, true)}
+                        onBlur={(e) => this.inputDatePickerFocus(e, false)}
+                        locale='es'
+                      />
+                    </div>
+                  </div>
+
+                  <div className="input-field col s12 l3">
+                    Cliente
+                  <Select
+                      placeholder="Seleccionar"
+                      value={{
+                        value: this.state.inputs.tipologia.id,
+                        label: this.state.inputs.tipologia.nombre
+                      }}
+                      onChange={this.handleChangeTipologia}
+                      options={this.state.tipologias.map(tpl => ({
+                        value: tpl.tipologiaId,
+                        label: tpl.descripcion,
+                        idCliente: tpl.clienteId,
+                        tiposTramite: tpl.tipoTramite,
+                        documentoSinSoporte: tpl.documentoSinSoporte
+                      })
+                      )}
+                    />
+                  </div>
+
+                  <div className="input-field col s12 l3">
+                    Linea de negocio
+                  <Select
+                      value={{
+                        value: this.state.inputs.tipoTramite.id,
+                        label: this.state.inputs.tipoTramite.nombre
+                      }}
+                      placeholder="Seleccionar"
+                      onChange={this.handleChangeTipoTramite}
+                      options={this.state.tiposTramite.map(ttm => ({ value: ttm.tipoTramiteId, label: ttm.tipoTramite }))}
+                    />
+                  </div>
+
+                  <div className="input-field col s12 l3">
+                    Documento sin soporte
+                  <Select
+                      isDisabled={this.state.documentoSinSoporte.length > 0 ? false : true}
+                      value={{
+                        value: this.state.inputs.documentoSinSoporte.id,
+                        label: this.state.inputs.documentoSinSoporte.nombre
+                      }}
+
+                      onChange={this.handleChangeDocumentoSinSoporte}
+                      options={this.state.documentoSinSoporte.map(dss => ({
+                        value: dss.documentoSinSoporteId,
+                        label: dss.documentoSinSoporteNombre
+                      })
+                      )}
+                    />
+                  </div>
+
+                </div>
+
+                <div className="row">
+                  <div className="input-field col s12 l3">
+                    Centro de recepción
+                  <Select
+                      placeholder="Seleccionar"
+                      value={{
+                        value: this.state.inputs.centroRecepcion.id,
+                        label: this.state.inputs.centroRecepcion.nombre
+                      }}
+                      onChange={this.handleChangeCentrosRcp}
+                      options={this.state.centrosRecepcion.map(ctrRcp => ({
+                        value: ctrRcp.centroRecpId,
+                        label: ctrRcp.nombre,
+                        sucursalesOrigen: ctrRcp.sucursalesOrigen,
+                        tipologia: this.state.inputs.tipologia
+                      })
+                      )}
+                    />
+                  </div>
+
+                  <div className="input-field col s12 l3">
+                    Sucursal origen
+                  <Select
+                      value={{
+                        value: this.state.inputs.sucursalOrigen.id,
+                        label: this.state.inputs.sucursalOrigen.nombre
+                      }}
+                      placeholder="Seleccionar"
+                      onChange={this.handleChangesucursalesOrigen}
+                      options={this.state.sucursalesOrigen.map(scrOrg => ({ value: scrOrg.sucursalId, label: scrOrg.nombre }))}
+                    />
+                  </div>
+
+                  <div className="input-field col s12 l3">
+                    Preradicado
+                  <InputPreradicados onChange={this.handleChangePreradicado} />
+                  </div>
+
+                  <div className="input-field col s12 l3">
+                    Recobros (NPBS)
+
+                  <label>
+                      <br />
+                      <input name="npbs" id="npbs" onChange={this.handleChangeChecked} type="checkbox" className="filled-in" />
+                      <span>Recobros (NPBS)</span>
+                    </label>
+                  </div>
+
+
+                </div>
+
+                <div className="row">
+
+                  <div className="input-field col s12 l3">
+                    <input
+                      type="number"
+                      name="codigoInicial"
+                      id="codigoInicial"
+                      onChange={this.handleChange}
+                      onKeyPress={evt => {
+                        const longitud = evt.target.value;
+                        if (longitud.length >= 12) {
+                          evt.preventDefault();
+                        }
+
+                        if (evt.which != 8 && evt.which != 0 && evt.which < 48 || evt.which > 57 || evt.target.value === 12) {
+                          evt.preventDefault();
+                        }
+                      }}
+                      className="validate"
+                    />
+                    <label htmlFor="codigoInicial">Código Barras Inicial</label>
+                  </div>
+                  <div className="input-field col s12 l3">
+                    <input
+                      type="number"
+                      name="codigoFinal"
+                      id="codigoFinal"
+                      onChange={this.handleChange}
+                      onKeyPress={evt => {
+                        const longitud = evt.target.value;
+                        if (longitud.length >= 12) {
+                          evt.preventDefault();
+                        }
+                        if (evt.which != 8 && evt.which != 0 && evt.which < 48 || evt.which > 57) {
+                          evt.preventDefault();
+                        }
+                      }}
+                      className="validate"
+                    />
+                    <label htmlFor="codigoFinal">Código Barras Final</label>
+                  </div>
+
+                  <div className="input-field col s12 l3">
+                    Cantidad
+                  <div>
+                      {this.cantidadView()}
+                    </div>
+                  </div>
+
+                  <div className="input-field col s12 l3">
+                    Diferencia preradicado
+                  <div>
+                      {this.diferenciaView()}
+                    </div>
+                  </div>
+
+                </div>
+
+                <div className="row center-align">
+                  <div className="input-field col s12 l12">
+                    <button className="btn waves-light btn-small" type="submit" disabled={this.state.btnSubmitDisable} name="action">{this.state.btnSubmitText}
+                      <i className="material-icons right">send</i>
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          )
+        }}
+      </ContextAuthWso2.Consumer>
+    );
+  };
+};
+export default FormRecepcionFisica;

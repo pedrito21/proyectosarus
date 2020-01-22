@@ -1,0 +1,23 @@
+para arrancar el (backend y el frontend)
+
+
+BACKEND
+
+1) entramos a la carpeta del backend 
+
+- cd .\backend
+- npm start
+
+
+FRONTEND
+
+2) no entramos en ninguna carpeta
+
+- npm start
+
+
+
+
+debo estar en la carpeta del database para que se genera la base de datos automaticamente
+
+PS C:\Users\pedro.cervantes\Documents\git\cmi\Repo_CMI_GESTOR_BACKEND\database> npm run db

@@ -1,0 +1,26 @@
+ 
+         
+		 
+		 
+
+exports.consultarestadoDocumento = async(req, res) => {
+   try {
+        let consultarestadoDocumento = []
+
+        const {
+            tipologiacliente,
+            numeroCajaFisica,
+            numeroDocumentoPrestador,
+            fechaInicial,
+            caja,
+            documentos,
+            fechaFinal,
+            estadoCaja,
+            estadoCajaTrazabilida,
+            fechaInicialEstado,
+            fechaFinalEstado,
+            limit,
+            offset
+        } = req.body
+  
+    }

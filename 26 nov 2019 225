@@ -1,0 +1,155 @@
+const db = require('../database/model');
+const Configuracion = db.configuracion;
+//const moment = require("moment");
+//import axios from 'axios';
+const axios = require('axios');
+
+
+
+const consumirMerqueo = async (dniProviderType, dniProvider, billNumber, cdCufe, sourceEBil, totalBill, userDni) => {
+    let configApiMerqueo = await Configuracion.findOne({
+        attributes: ['cnf_tipoconfig', 'cnf_nombreconfig', 'cnf_valorconfig'],
+        where: {
+            cnf_nombreconfig: 'conexionWs',
+            cnf_tipoconfig: 'apiMerqueo'
+        }
+    });
+
+    configApiMerqueo = JSON.parse(configApiMerqueo.cnf_valorconfig);
+    let url = configApiMerqueo.host;
+    const objectdata = { dniProviderType, dniProvider, billNumber, cdCufe, sourceEBil, totalBill, userDni }
+    return axios({
+        method: 'POST', url, objectdata,
+        headers: {
+            auth: {
+                username: configApiMerqueo.user,
+                password: configApiMerqueo.pass
+            }
+        }
+    }).then(response => {
+        console.log(response)
+
+        db.merqueo.create({
+            mrq_numFactura: billNumber,
+            mrq_valorEnviado: JSON.stringify(objectdata),
+            mrq_respuesta: JSON.stringify(response),
+            mrq_horaInt: horaIntento,
+            mrq_fecInt: fechaIntento
+
+        })
+
+    })
+        .catch(error => {
+            console.log(error)
+        });
+
+
+}
+
+const remplazar = (data, llave, obj) => {
+    return data.map(item => {
+        item[llave] = obj[item[llave]] || item[llave];
+        return item;
+    });
+}
+
+const prepararDatos = async (numFactura) => {
+
+    //console.log('preeparar datos.......', numFactura);
+
+    let strSql = `SELECT ra.rdc_tipoDocumento "dniProviderType",
+        ra.rdc_numeroDocumento "dniProvider",
+        ra.rdc_codBarras "billNumber",
+        "" as 'cdCufe',
+        ti.tpl_id "sourceEBill",
+        "0" AS  'totalBill',
+        "123456789" AS 'userDni'
+
+        FROM tipologia AS ti
+
+        LEFT JOIN lote AS lo ON  lo.lot_id = ti.tpl_id
+        LEFT JOIN radicacion AS ra ON ra.rdc_id = lo.lot_id
+        WHERE rdc_numeroDocumento = :numfactura`;
+
+
+    let campos = await db.sequelize.query(
+        strSql,
+        {
+            replacements: {
+                numfactura: numFactura
+            },
+            type: "SELECT"
+        }).catch(error => {
+            logGeneral({
+                "path": `${__filename} ${__line}`,
+                "origen": origen,
+                "log": error,
+                "tipoLog": "E"
+            });
+        });
+
+    // console.log('campos....', campos);
+
+
+
+
+    const tipoCliente = await Configuracion.findAll({
+        attributes: ['cnf_tipoconfig', 'cnf_nombreconfig', 'cnf_valorconfig'],
+        where: {
+            cnf_nombreconfig: 'tipologiaCliente',
+            cnf_tipoconfig: 'servicioMerqueo'
+        }
+    });
+
+
+    const configTipoCliente = JSON.parse(tipoCliente[0]['cnf_valorconfig'])
+
+
+    //console.log('pendiente primer filtro****', configTipoCliente);
+
+
+
+    const tipoIdentificacion = await Configuracion.findAll({
+        attributes: ['cnf_tipoconfig', 'cnf_nombreconfig', 'cnf_valorconfig'],
+        where: {
+            cnf_nombreconfig: 'TipoIdentificacionPrestador',
+            cnf_tipoconfig: 'ServicioMerqueo'
+        }
+    });
+
+
+    const configTipoIdentificacion = JSON.parse(tipoIdentificacion[0]['cnf_valorconfig'])
+
+    //console.log('pendiente segundo filtro****', configTipoIdentificacion);
+
+    // console.log('aqui estoy.......', campos);
+
+    campos = remplazar(campos, 'sourceEBill', configTipoCliente);
+    campos = remplazar(campos, 'dniProviderType', configTipoIdentificacion);
+
+    //console.log('se hizo el remplazo##########', campos);
+
+    // return response;
+
+}
+
+
+exports.consumirMerqueo = async (numFactura) => {
+
+    //console.log('helper...', numFactura);
+    try {
+        const datos = await prepararDatos(numFactura);
+        if (datos)
+            consumirMerqueo(datos.dniProviderType,
+                datos.dniProvider,
+                datos.billNumber,
+                datos.cdCufe,
+                datos.sourceEBil,
+                datos.totalBill,
+                datos.userDni);
+    } catch (error) {
+        console.log(error);
+    }
+
+    // console.log('###..lo ultimo en guaracha...##', datos[0]);
+};

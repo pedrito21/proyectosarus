@@ -1,0 +1,13 @@
+coniguracion react por la consola
+
+1. configuracion pakage json
+
+npm init --yes
+
+2. instalamos el servidvor
+
+npm i express --save
+
+3. index.jsx 
+
+ese el archivo inicial de react

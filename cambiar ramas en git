@@ -1,0 +1,132 @@
+paso a paso git
+
+1). estamos en tagsNoObligatorios hacemos un estatus para saber que archivos se han modificago
+
+pedro.cervantes@Rentatic-0558 MINGW64 ~/Documents/git/cmi/Repo_CMI_GESTOR_BACKEND (tagsNoObligatorios)
+
+-  git status
+
+___________________________________________________________________
+On branch tagsNoObligatorios
+Your branch is up to date with 'origin/tagsNoObligatorios'.
+
+Changes not staged for commit:
+  (use "git add/rm <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+        modified:   database/migrations/20191029204415-Plantilla_migracion.js
+        deleted:    database/model/seleccionTag.js
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+        backend/app/controller/opcionalTag/
+        backend/app/routes/opcionalTag.route.js
+        database/model/opcionalTag.js
+        text.js
+
+no changes added to commit (use "git add" and/or "git commit -a")
+.........................................................................
+
+2) hacemos 1 add . ojo con el espacio del punto
+
+-git add .
+__________________________________________________________
+
+3) hacemos un commit con el comentario que lo que se hizo
+
+- git commit -m "creacion de la tabla en la base de datos"
+.........................................................................
+
+
+
+4) luego nos cambiamos de rama de con un checkout(tagsNoObligatorios) a (develop)
+
+- git checkout develop
+
+_____________________________________________________________________________
+5)estando en la rama de develop hacemos un pull
+
+- git pullgit develop
+
+.........................................................................
+
+6) hacemos un origin
+
+- git pull origin develop
+
+esto es lo que muestra
+
+
+7) hacemos un merge
+
+git
+................................................................................
+
+8) hacemos un merge con develop-tagsNoObligatorios
+
+pedro.cervantes@Rentatic-0558 MINGW64 ~/Documents/git/cmi/Repo_CMI_GESTOR_BACKEND (develop)
+ 
+ - git merge tagsNoObligatorios
+ -git :q
+
+
+remote: Counting objects: 672, done.
+Receiving objects: 100% (672/672), 9.90 MiB | 1.55 MiB/s, done.
+Resolving deltas: 100% (302/302), completed with 73 local objects.
+From https://git-codecommit.us-east-1.amazonaws.com/v1/repos/Repo_CMI_GESTOR_BACKEND
+ * branch            develop    -> FETCH_HEAD
+   d76140a..581ec30  develop    -> origin/develop
+Updating 738e194..581ec30
+Fast-forward
+ .../almacenamientoFactura/almacenamiento.class.js  |   17 +-
+ .../app/controller/almacenamientoFactura/index.js  |    4 +-
+ .../controller/auditoria/auditoria.controller.js   |   12 +-
+ backend/app/controller/auditoria/auditoria.js      |   12 +-
+ .../controller/auditoria/auditoriaEntry.class.js   |    3 +-
+ .../controller/auditoria/guardarAuditoria.class.js |  204 +++-
+ backend/app/controller/authWso2/index.js           |    5 +-
+ backend/app/controller/autorizacion.controller.js  |   80 +-
+ backend/app/controller/caja.controller.js          |  162 ++-
+ .../app/controller/dataEntry/guardarDatos.class.js |   62 +-
+ .../documentoInforme/constructorConsulta.class.js  |   42 +
+ .../documentoInforme/informe.contoller.js          |   30 +-
+ backend/app/controller/documentoInforme/informe.js |   53 +-
+ .../documentoInforme/informeEntrada.class.js       |  104 +-
+ backend/app/controller/estadoGestion/index.js      |   36 +
+ backend/app/controller/gestion/gestionClass.js     |  301 +++---
+ backend/app/controller/gestion/index.js            |   69 +-
+ backend/app/controller/valerecaudo.controller.js   |  110 +-
+ backend/app/routes/almacenamientoFactura/index.js  |   20 +-
+ backend/app/routes/autorizacion.route.js           |   10 +-
+ backend/app/routes/caja.route.js                   |    3 +-
+ .../app/routes/documentoInforme/informe.route.js   |    2 +
+ backend/app/routes/estadoGestion/index.js          |    5 +
+ backend/app/routes/gestion/index.js                |    2 +-
+ backend/app/routes/valerecaudo.route.js            |    9 +-
+ backend/crons/cargaP8/carga.js                     |  269 +++++
+ backend/crons/cgargaP8/cargaP8.js                   |  268 +++++
+ backend/crons/cargaP8/classCargaP8.js              |  204 ++++
+ backend/crons/cargaP8/conectarAWS.js               |  188 ++++
+ backend/crons/cargaP8/start.js                     |   97 ++
+ backend/crons/cargaP8/unirImagenes.js            
+
+___________________________________________________________________
+
+9). hacemo un pushqqqqq:
+
+git push origin develop
+
+___________________________________________________________________1
+10) por ultimo nos cambiamos nuevamente a nuestra rama en este caso es tagsNoObligatorios
+
+-  git checkout tagsNoObligatorios
+
+para cambiara de rama
+$ git checkout -b apiMerqueo
+
+##################################################
+para eliminar una rama creada vieja
+git branch -D apiMerqueo
+
+###############################################
+
+

@@ -1,0 +1,273 @@
+const db = require("../config/db.config.js");
+const Prestadores = db.prestadores;
+const Sucursales = db.sucursales;
+const modulo = "prestadores.controller";
+const Errores = require("./errores.controller");
+
+// Post a Prestadores
+exports.create = (req, res) => {
+  // Save to MySQL database
+  Prestadores.create({
+    numeroDocumento: req.body.numeroDocumento,
+    codigoHabilitacion: req.body.codigoHabilitacion,
+    nombrePrestador: req.body.nombrePrestador,
+    especialidad: req.body.especialidad,
+    electronico: req.body.electronico,
+    correo: req.body.correo,
+    EstadoIdEstado: req.body.IdEstado,
+    TiposDocumentoIdTiposDocumento: req.body.IdTiposDocumento,
+    RegionaleIdRegional: req.body.IdRegional,
+    TiposPrestadoreIdTiposPrestador: req.body.IdTiposPrestador
+  })
+    .then(prestador => {
+      // Send created Prestadores to client
+      res.send(prestador);
+    })
+    .catch(error => {
+      console.log(error);
+      Errores.create({
+        modulo,
+        descripcion: { error: JSON.stringify(error.stack) },
+        statusError: error.message,
+        idUsuario: "idPrueba"
+      });
+    });
+};
+
+// FETCH all models
+exports.findAll = (req, res) => {
+  Prestadores.findAll()
+    .then(prestadores => {
+      // Send all models to Client
+      res.send(prestadores);
+    })
+    .catch(error => {
+      console.log(error);
+      Errores.create({
+        modulo,
+        descripcion: { error: JSON.stringify(error.stack) },
+        statusError: error.message,
+        idUsuario: "idPrueba"
+      });
+    });
+};
+
+// Find a Prestadores by Id
+exports.findById = (req, res) => {
+  Prestadores.findAll({
+    where: {
+      idPrestador: req.params.idPrestadores
+    }
+  })
+    .then(prestador => {
+      if (prestador) res.send(prestador[0]);
+    })
+    .catch(error => {
+      console.log(error);
+      Errores.create({
+        modulo,
+        descripcion: { error: JSON.stringify(error.stack) },
+        statusError: error.message,
+        idUsuario: "idPrueba"
+      });
+    });
+};
+
+// Find a Prestadores by Id
+exports.findByDoc = (req, res) => {
+  console.log("documento: ", req.params.documento);
+  Prestadores.findAll({
+    include: {
+      model: db.tiposDocumentos,
+      attributes: ["abreviatura"]
+    },
+    where: {
+      numeroDocumento: req.params.documento
+    }
+  })
+    .then(prestador => {
+      if (prestador && prestador.length > 0) {
+        res.send({
+          respuesta: {
+            tipoPrestador: prestador[0].electronico === 1 ? "E" : "F",
+            nombrePrestador: prestador[0].nombrePrestador,
+            tipoDocumentoPrestador: prestador[0].TiposDocumento.abreviatura
+          }
+        });
+      } else {
+        res.send({
+          respuesta: {
+            tipoPrestador: "F",
+            nombrePrestador: "",
+            tipoDocumentoPrestador: ""
+          }
+        });
+      }
+    })
+    .catch(error => {});
+};
+
+//Find a Prestador by numDoc and typeDoc
+exports.findByNumDocOnBack = (req, res) => {
+  return new Promise(function(resolve, reject) {
+    Prestadores.findAll({
+      include: [
+        {
+          model: db.tiposDocumentos,
+          where: {
+            abreviatura: req.body.tipoDoc
+          }
+        }
+      ],
+      where: {
+        numeroDocumento: req.body.numDoc
+      }
+    })
+      .then(prestador => {
+        resolve(prestador[0]);
+      })
+      .catch(error => {
+        console.log(error);
+        Errores.create({
+          modulo,
+          descripcion: { error: JSON.stringify(error.stack) },
+          statusError: error.message,
+          idUsuario: "idPrueba"
+        });
+        reject(error);
+      });
+  });
+};
+
+//Find a Prestador by numDoc and client and typeDoc
+exports.findByNumDocIdCliOnBack = (req, res) => {
+  return new Promise(function(resolve, reject) {
+    Prestadores.findAll({
+      include: [
+        {
+          model: db.tiposDocumentos,
+          where: {
+            abreviatura: req.body.tipoDoc
+          }
+        }
+      ],
+      where: {
+        numeroDocumento: req.body.numDoc,
+        ClienteIdCliente: req.body.cliente
+      }
+    })
+      .then(prestador => {
+        resolve(prestador[0]);
+      })
+      .catch(error => {
+        console.log(error);
+        Errores.create({
+          modulo,
+          descripcion: { error: JSON.stringify(error.stack) },
+          statusError: error.message,
+          idUsuario: "idPrueba"
+        });
+        reject(error);
+      });
+  });
+};
+
+exports.findByCli = async (req, res) => {
+  const usu = Prestadores.findAll({
+    attributes: ["idPrestador", "nombrePrestador"],
+    where: {
+      ClienteIdCliente: req.params.idCliente
+    }
+  })
+    .then(prestador => {
+      /*respuesta = {
+        idPrestador: res.idPrestador,
+        nombrePrestador: res.nombrePrestador
+      };
+      res.send(respuesta);*/
+      res.send(prestador);
+    })
+    .catch(error => {
+      console.log(error);
+      Errores.create({
+        modulo,
+        descripcion: JSON.stringify(error.stack),
+        statusError: error.message,
+        idUsuario: "idPrueba"
+      });
+      console.log("enviando error");
+      res.send("Errores: " + error.message);
+    });
+};
+
+//Osmary Find a Prestador by client
+/*exports.findByCli = (req, res) => {
+  console.log("entra aaaa" + req.params.idCliente);
+  return new Promise(function(resolve, reject) {
+    Prestadores.findAll({
+      where: {
+        ClienteIdCliente: req.params.idCliente
+      }
+    })
+      .then(prestador => {
+        resolve(prestador[0]);
+      })
+      .catch(error => {
+        console.log(error);
+        Errores.create({
+          modulo,
+          descripcion: { error: JSON.stringify(error.stack) },
+          statusError: error.message,
+          idUsuario: "idPrueba"
+        });
+        reject(error);
+      });
+  });
+};*/
+
+//Finda Prestador by numDoc and typeDoc
+exports.findByNumDoc = async (req, res) => {
+  console.log(req.params.tipoDocumento);
+
+  respuesta = {};
+  Prestadores.findAll({
+    include: [
+      {
+        model: db.tiposDocumentos,
+        where: {
+          abreviatura: req.params.tipoDocumento
+        },
+        attributes: ["abreviatura", "descripcion"]
+      },
+      {
+        model: db.tiposPrestadores,
+        attributes: ["descripcion"]
+      }
+    ],
+    where: {
+      numeroDocumento: req.params.numeroDocumento
+    },
+    attributes: [
+      "idPrestador",
+      "numeroDocumento",
+      "codigoHabilitacion",
+      "nombrePrestador",
+      "especialidad",
+      "electronico",
+      "correo"
+    ],
+    raw: true
+  }).then(async prestador => {
+    let respuesta = prestador[0];
+    await Sucursales.findAll({
+      attributes: ["idSucursal", "nombreSucursal", "codigoSucursal"],
+      where: {
+        PrestadoreIdPrestador: respuesta.idPrestador
+      },
+      raw: true
+    }).then(prestadores => {
+      respuesta.sucursales = prestadores;
+      res.json(respuesta);
+    });
+  });
+};

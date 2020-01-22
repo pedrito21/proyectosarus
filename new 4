@@ -1,0 +1,58 @@
+usuario WSO2
+"userName": pedro.cervantes
+   "password": #123PedroCervantes
+   
+   
+   
+ API: dar datos del servidor al navegador
+ 
+un array puede contener muchos valores o muchos objetos(JSON)
+
+elemplo: esto seria un arreglo de Objeto
+
+user = [
+
+	{
+	 "nombre": "pedro"
+	 "apellido": "cervantes"
+	},
+	{
+	 "nombre": "harry"
+	 "apellido": "marin"
+	}
+]
+
+
+(ivestigar...... axios.......y....... react-materialize)
+
+
+
+nota: esto se ejecuta antes que el metodo (render) de esjecute
+ componentDidMount = () => {
+ //   getTags();
+  };
+  
+  
+ .....................................................................
+ 
+ 
+ hey pedido a travez de mi api por medio de una uncion los errores y la respuestas
+ y la respuesta es la que kvoy a mandar por consola
+ 
+ nota si la respuesta es una string hay que convertilo(JSON.parse(res.text))
+ 
+ componentDidMount(){
+		request
+			.get('https://localhost:3000/api/users')
+			.end(function(err, res){
+				console.log(res)
+				consola.log(JSON.parse(res.text));
+			}
+ }
+ 
+ 
+ 
+ 
+ 
+ 
+ 

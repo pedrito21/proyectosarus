@@ -1,0 +1,36 @@
+module.exports = (sequelize, Sequelize) => {
+    const seleccionTag = sequelize.define('seleccionTag', {
+        sct_id: {
+            type: Sequelize.INTEGER,
+            primaryKey: true,
+            autoIncrement: true
+        },
+        stc_tpl_id: {
+            type: Sequelize.INTEGER,
+            allowNull: true,
+            comment: "Tipologia para diferenciar los tags por proceso"
+        },
+        stc_tag: {
+            type: Sequelize.STRING(50),
+            allowNull: false,
+            comment: "Palabra clave configurada"
+        },
+        stc_proceso: {
+            type: Sequelize.STRING(5),
+            allowNull: false,
+            comment: "Columna que se pobla con la selección hecha en el front (tomando como valor conigurado de la tabla lista)"
+        }
+    },
+        {
+            freezeTableName: true,
+            createdAt: 'sct_created',
+            updatedAt: 'sct_updated'
+        }
+    )
+
+    seleccionTag.associate = (models) => {
+        seleccionTag.belongsTo( models.tipologia , { foreignKey: "stc_tpl_id" } )
+    }
+
+    return seleccionTag;
+}; 

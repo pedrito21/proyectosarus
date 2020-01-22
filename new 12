@@ -1,0 +1,20 @@
+    <div className="input-field col s12 l3">
+                    Fecha de recepción
+                  <div className={`divpk ${this.state.inputDatePickerFocus ? 'input_focus' : ''} center-align`}>
+                      <DatePickerRecepcion
+                        onKeyDown={e => e.preventDefault()}
+                        id="fechaRecepcion"
+                        name="fechaRecepcion"
+                        placeholder="Fecha Recepción"
+                        className="fecha_recepcion browser-default"
+                        selected={this.state.inputs.fechaRecepcion}
+                        onChange={this.onChangeFechaRecepcion}
+                        // minDate={new Date('01/01/2018')}
+                        maxDate={new Date()}
+                        dateFormat="dd/MM/yyyy HH:mm"
+                        onFocus={(e) => this.inputDatePickerFocus(e, true)}
+                        onBlur={(e) => this.inputDatePickerFocus(e, false)}
+                        locale='es'
+                      />
+                    </div>
+                  </div>

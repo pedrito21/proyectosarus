@@ -1,0 +1,151 @@
+import React, { Component } from "react";
+//import PropTypes from "componentes/estadosDocumentos/Component/node_modules/prop-types";
+import * as routes from "../../../utils/variables";
+import Select from 'react-select';
+import DatePickerRecepcion, { registerLocale } from "react-datepicker";
+import {TextInput} from "react-materialize";
+import moment from "moment";
+import diff from "moment"
+
+const {} = routes;
+
+const datos = [
+  { 
+    Ndecaja: "123",
+    CantidadTotalFacturaCaja: "30",
+    EstadoAprobado: "20" ,
+    EstadoDevuelto: "5" ,
+    EstadoIntermedio: "10",
+    EstadoGlosado: "15",
+    SinEstado: "",
+    TotalFactura:"30",
+    DiferenciaFactura:"35" 
+  },
+
+  { 
+    Ndecaja: "456",
+    CantidadTotalFacturaCaja: "8",
+    EstadoAprobado: "40" ,
+    EstadoDevuelto: "6" ,
+    EstadoIntermedio: "10",
+    EstadoGlosado: "12",
+    SinEstado: "",
+    TotalFactura:"30",
+    DiferenciaFactura:"4" 
+  },
+ ];
+
+export default class TablaGestion extends Component {
+construirFilas(datos){
+  console.log(datos);
+  return datos.map((dato, i) => {
+    const llaves = [
+      'Ndecaja',
+      'CantidadTotalFacturaCaja',
+      'EstadoAprobado' ,
+      'EstadoDevuelto' ,
+      'EstadoIntermedio',
+      'EstadoGlosado',
+      'SinEstado',
+      'TotalFactura',
+      'DiferenciaFactura' 
+    ];
+    return(
+      <tr key = {i}>
+        {llaves.map((llave, j) => {
+          return <td key = {`${i}-${j}`} > {dato[llave]}
+          </td>;
+        })}
+        </tr>
+    );
+  });
+}
+
+
+
+  render() {
+    return (
+      <div className="container center-align">
+        <div id="form_recepcion" className="row card">
+          <div className="row" style={{ padding: "20px" }}>
+               <div className="row">
+                     <div className="input-field col s12 l3">Clientes
+                    
+                    <Select name="cliente" l={12} label="Cliente" defaultValue="0" onChange=""  >
+                        <option disabled value={0}>
+                            Seleccione un cliente
+                        </option>
+                        <option value="1">
+                            Sanitas
+                        </option>
+                        <option value="2">
+                            Sura
+                        </option>
+                    </Select>
+               
+                          </div>
+
+                             <div className="input-field col s12 l3">Estados
+                                 <Select
+                                      id="generic"
+                                      placeholder="Seleccionar"
+                                      className="browser-default"
+                                      />
+                                </div>
+
+
+                                   <div className="input-field col s12 l3">
+                                       <TextInput max={moment().format("YYYY-MM-DD")} name="fechaIniRecepcion" id="fecha" type="date" l={12} label="Fecha inicial recepción" onChange={(e) => {
+                                           }} />
+                                     </div>
+                                   <div className="input-field col s12 l3">
+                                      <TextInput max={moment().format("YYYY-MM-DD")} l={12} name="fechaFinRecepcion" id="fecha" type="date" label="Fecha final recepción" onChange={(e) => {
+                                           }} />
+                                      </div>
+                      </div>
+
+                                                <div className="row">
+                                                    <div className="input-field col s10 l3">Linea de Negocio
+                                                       <Select
+                                                            id="generic"
+                                                            placeholder="Seleccionar"
+                                                            className="browser-default"
+                                                           
+                                                           />
+                                                     </div>
+                                                   </div>
+
+
+                                                  <div className="col s12 24" style={{overflowX: 'scroll'}}>
+                                                      <table>
+                                                          <thead>
+                                                              <tr>
+                                                                  <th>N de caja</th>
+                                                                  <th>Cantidad Total Factura-Caja</th>
+                                                                  <th>Estado Aprobado</th>
+                                                                  <th>Estado Devuelto</th>
+                                                                  <th>Estado Intermedio</th>
+                                                                  <th>Estado Glosado</th>
+                                                                  <th>Sin Estado</th>
+                                                                  <th>Total Factura</th>
+                                                                  <th>Diferencia Factura</th>
+                                                                  </tr>
+                                                              </thead>
+                                                                  <tbody>
+                                                                          {this.construirFilas(datos)}
+                                                                    </tbody>
+                                                          </table>
+
+                   </div>
+                                                <div className="input-field col s12 l12" style={{marginTop: '40px'}}>
+                                                    <button className="btn" >Descargar
+                                                      <i className="material-icons right">
+                                                       </i>
+                                                      </button>
+                                                   </div>
+           </div>
+         </div>
+       </div>
+    );
+  }
+}

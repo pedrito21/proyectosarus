@@ -1,0 +1,63 @@
+
+// meter datos a una base de datos 
+persona.create({
+	nombres: req.body.nombres,
+	apellidos: req.body.apellidos,
+	telefono: req.body.telefono
+	//a qui despues de crear  la persona maneja el objeto que recibes como persona
+	// y me envias  como respuesta persona creada
+}).then(persona =>{
+	res.send('Persona Creada')
+})
+
+//para listar a las personas de esa misma tabla
+// me muestra los objetos guardado en ese mismo modelo
+persona.findAll()
+	.then(persona => {
+		//tomamosla lista persona y esa lista la vamos a imprimir en pantalla
+		console.log(persona)// esto solamente es para probar por consola
+		//enviamos como respues la lista de persona resultantes
+		res.send('GET /persona)
+	}
+
+
+// para optener los datos de una persona en particular 
+// optenemos el id de la persona de la cual vamos a recuperar los datos
+let personaId = req.params.id
+persona.findOne({where: {id:personaIdd}})
+//entonces enviamos el objeto como respuesta
+.then(persona =>{
+	//json cuando enviamos objetos
+	res.json(persona)	
+}
+
+// reacion de ingreso de dato para la tabla merqueo
+db.merqueo.create({
+	mrq_numFactura:,
+	mrq_valorEnviado:,
+	mrq_respuesta:,
+	mrq_horaInt:,
+	mrq_fecInt:
+	
+}).then(merqueo =>{
+	res.send('datos ingresados correctamente')
+});
+
+
+
+JSON.stringify()//convierte un objeto o valor de JavaScript en una cadena de texto JSON
+
+console.log(`no se encontró el archivo ${ext}`);// mostrar mensaje + concatenacion
+
+
+
+
+
+
+
+
+
+
+
+
+
